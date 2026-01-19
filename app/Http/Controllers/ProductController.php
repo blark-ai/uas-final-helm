@@ -8,26 +8,35 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    // [PUBLIC] Halaman Depan: Menampilkan semua produk + Search
-    public function index(Request $request)
+    // [PUBLIC] Halaman Depan: Hanya menampilkan Hero Section
+    public function index()
+    {
+        // Karena halaman depan sekarang hanya Hero, kita tidak perlu memanggil data produk di sini
+        return view('welcome');
+    }
+
+    // [PUBLIC] Halaman Katalog: Menampilkan SEMUA produk + Fitur Search dari Navbar
+    public function allProducts(Request $request)
     {
         $query = Product::query();
 
-        // Logika Search (Nama atau Deskripsi)
-        if ($request->has('search')) {
+        // Logika Search yang dipindahkan ke Navbar
+        if ($request->has('search') && $request->search != '') {
             $query->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%');
         }
 
-        // Ambil data terbaru, 9 per halaman
+        // Ambil data terbaru, 9 per halaman agar rapi di grid 3 kolom
         $products = $query->latest()->paginate(9);
 
-        return view('welcome', compact('products'));
+        // Mengembalikan view 'products.blade.php' yang tadi kita buat
+        return view('products', compact('products'));
     }
 
     // [PUBLIC] Halaman Detail Satu Produk
     public function show(Product $product)
     {
+        // Pastikan kamu sudah punya file resources/views/products/show.blade.php
         return view('products.show', compact('product'));
     }
 
@@ -48,8 +57,7 @@ class ProductController extends Controller
     // [CLIENT] Proses Simpan Produk Baru
     public function store(Request $request)
     {
-        // 1. Bersihkan Format Rupiah (Hapus titik "." dari input "15.000")
-        // Penting dilakukan sebelum validasi 'numeric'
+        // 1. Bersihkan Format Rupiah
         if ($request->has('price')) {
             $request->merge([
                 'price' => str_replace('.', '', $request->price)
@@ -59,11 +67,11 @@ class ProductController extends Controller
         // 2. Validasi Input
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric', // Sekarang aman dicek numeric karena titik sudah hilang
+            'price' => 'required|numeric',
             'description' => 'required',
             'production_address' => 'required',
             'maps_link' => 'required|url',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         // 3. Upload Gambar
@@ -83,42 +91,37 @@ class ProductController extends Controller
         return redirect()->route('dashboard')->with('success', 'Produk berhasil ditambahkan!');
     }
 
-    // [CLIENT] Menampilkan Form Edit (BARU)
+    // [CLIENT] Menampilkan Form Edit
     public function edit(Product $product)
     {
-        // Pastikan hanya pemilik yang bisa edit
         if ($product->user_id !== auth()->id()) {
             abort(403, 'Anda tidak memiliki izin mengedit produk ini.');
         }
         return view('products.edit', compact('product'));
     }
 
-    // [CLIENT] Proses Update Data (BARU)
+    // [CLIENT] Proses Update Data
     public function update(Request $request, Product $product)
     {
-        // 1. Cek Pemilik
         if ($product->user_id !== auth()->id()) {
             abort(403);
         }
 
-        // 2. Bersihkan Format Rupiah
         if ($request->has('price')) {
             $request->merge([
                 'price' => str_replace('.', '', $request->price)
             ]);
         }
 
-        // 3. Validasi
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric',
             'description' => 'required',
             'production_address' => 'required',
             'maps_link' => 'required|url',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Nullable artinya boleh kosong (kalau gak ganti foto)
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 4. Siapkan Data Update
         $data = [
             'name' => $request->name,
             'price' => $request->price,
@@ -127,17 +130,13 @@ class ProductController extends Controller
             'maps_link' => $request->maps_link,
         ];
 
-        // 5. Cek jika ada upload foto baru
         if ($request->hasFile('image')) {
-            // Hapus foto lama dari storage biar bersih
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
             }
-            // Simpan foto baru
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        // Update Database
         $product->update($data);
 
         return redirect()->route('dashboard')->with('success', 'Produk berhasil diperbarui!');
@@ -146,17 +145,14 @@ class ProductController extends Controller
     // [CLIENT] Hapus Produk
     public function destroy(Product $product)
     {
-        // Pastikan yang menghapus adalah pemiliknya
         if ($product->user_id !== auth()->id()) {
             abort(403);
         }
         
-        // Hapus foto dari storage sebelum hapus data di DB
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
 
-        // Hapus data
         $product->delete();
         return back()->with('success', 'Produk berhasil dihapus');
     }

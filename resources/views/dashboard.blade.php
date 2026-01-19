@@ -4,9 +4,15 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Dashboard Produk Saya') }}
             </h2>
-            <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                Total: {{ $products->count() }} Produk
-            </span>
+            <div class="flex items-center gap-4">
+                {{-- TOMBOL KEMBALI KE WELCOME PAGE --}}
+                <a href="{{ url('/') }}" class="hidden md:block text-sm text-amber-700 hover:text-amber-900 font-bold underline">
+                    🏠 Lihat Beranda
+                </a>
+                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    Total: {{ $products->count() }} Produk
+                </span>
+            </div>
         </div>
     </x-slot>
 
@@ -14,10 +20,16 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             <div class="mb-8 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="flex gap-3 w-full md:w-auto">
+                <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                    {{-- TOMBOL LIHAT BERANDA (VERSI MOBILE & DESKTOP) --}}
+                    <a href="{{ url('/') }}" class="flex-1 md:flex-none text-center bg-gray-800 hover:bg-black text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:-translate-y-1">
+                        🏠 Beranda
+                    </a>
+
                     <a href="{{ route('products.create') }}" class="flex-1 md:flex-none text-center bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:-translate-y-1">
                         + Tambah Produk
                     </a>
+
                     <a href="{{ route('post.create') }}" class="flex-1 md:flex-none text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition transform hover:-translate-y-1">
                         ✨ Generate Promosi
                     </a>

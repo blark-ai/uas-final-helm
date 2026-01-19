@@ -1,78 +1,46 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Produk Lokal Indonesia</title>
+    <title>Selamat Datang - Produk Lokal</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 antialiased">
-    <div class="relative flex items-top justify-center min-h-screen bg-gray-100 sm:items-center py-4 sm:pt-0">
-        @if (Route::has('login'))
-            <div class="fixed top-0 right-0 px-6 py-4 sm:block z-50">
-                @auth
-                    <a href="{{ url('/dashboard') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">Register</a>
-                    @endif
-                @endauth
+<body class="bg-[#F4EFE6] antialiased">
+    {{-- NAVBAR --}}
+    <nav class="bg-[#4B5D3B] text-white py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div class="text-xl font-bold">LokalID</div>
+        <div class="flex items-center gap-8">
+            <div class="hidden md:flex gap-6 text-sm font-medium">
+                <a href="{{ route('home') }}" class="text-amber-200">Home</a>
+                <a href="{{ route('products.list') }}" class="hover:text-amber-200">Produk</a>
+                @auth <a href="{{ url('/dashboard') }}" class="hover:text-amber-200">Dashboard</a> @endauth
             </div>
-        @endif
-
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 w-full mt-16">
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-extrabold text-amber-800">Dukung Produk Lokal 🇮🇩</h1>
-                <p class="mt-2 text-gray-600">Temukan karya terbaik anak bangsa di sekitarmu.</p>
-                
-                <form action="{{ route('home') }}" method="GET" class="mt-6 flex justify-center gap-2">
-                    <input type="text" name="search" placeholder="Cari keripik, batik, kopi..." value="{{ request('search') }}" class="rounded-lg border-gray-300 p-2 w-full md:w-1/3 shadow-sm focus:border-amber-500 focus:ring-amber-500">
-                    <button type="submit" class="bg-amber-700 hover:bg-amber-800 text-white px-6 py-2 rounded-lg transition">Cari</button>
-                </form>
-            </div>
-
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-center">{{ session('success') }}</div>
-            @endif
-            @if(session('error'))
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-center">{{ session('error') }}</div>
-            @endif
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                @forelse($products as $product)
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
-                    <div class="p-5">
-                        <h3 class="font-bold text-xl text-gray-800 mb-1">{{ $product->name }}</h3>
-                        <p class="text-amber-600 font-bold text-lg">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-                        <p class="text-gray-500 text-sm mt-2 line-clamp-2">{{ $product->description }}</p>
-                        
-                        <div class="mt-4 flex justify-between items-center pt-4 border-t border-gray-100">
-                            <a href="{{ route('product.show', $product) }}" class="text-gray-600 hover:text-amber-700 text-sm font-medium">Detail & Lokasi</a>
-                            
-                            @auth
-                                <form action="{{ route('order.store', $product) }}" method="POST">
-                                    @csrf
-                                    <button onclick="return confirm('Beli produk ini?')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm transition">Beli Sekarang</button>
-                                </form>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Login untuk beli</span>
-                            @endauth
-                        </div>
-                    </div>
-                </div>
-                @empty
-                <div class="col-span-3 text-center py-10 text-gray-500">
-                    Belum ada produk lokal yang ditemukan. Jadilah yang pertama!
-                </div>
-                @endforelse
-            </div>
-            
-            <div class="mb-10">
-                {{ $products->links() }}
-            </div>
+            {{-- Search Bar di Navbar --}}
+            <form action="{{ route('products.list') }}" method="GET" class="relative">
+                <input type="text" name="search" placeholder="Cari produk..." class="bg-white/10 border-none rounded-full py-1.5 px-4 text-xs focus:bg-white focus:text-gray-800 focus:ring-2 focus:ring-amber-500 transition-all w-32 md:w-48">
+            </form>
         </div>
-    </div>
+    </nav>
+
+    {{-- HERO SECTION --}}
+    <section class="bg-[#7D5A44] min-h-[80-vh] flex items-center justify-center py-32 px-6 text-center text-white relative overflow-hidden">
+        <div class="relative z-10">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 drop-shadow-lg uppercase tracking-tighter">Dukung Produk Lokal</h1>
+            <p class="text-xl md:text-2xl mb-12 opacity-90 font-light max-w-2xl mx-auto">Temukan kebanggaan karya terbaik anak bangsa langsung dari daerahmu.</p>
+            <a href="{{ route('products.list') }}" class="bg-[#D35400] hover:bg-[#E67E22] text-white font-bold py-4 px-12 rounded-xl shadow-2xl transition transform hover:scale-105 inline-block text-lg">
+                Lihat Produk
+            </a>
+        </div>
+        {{-- Dekorasi Daun --}}
+        <div class="absolute -bottom-20 -left-20 opacity-10 w-80 rotate-45">
+            <img src="https://cdn-icons-png.flaticon.com/512/892/892926.png" alt="leaf">
+        </div>
+    </section>
+
+    <footer class="bg-[#4B5D3B] py-8 text-center text-white/50 text-sm">
+        <p>&copy; 2026 LokalID. Bangga Buatan Indonesia.</p>
+    </footer>
 </body>
 </html>
